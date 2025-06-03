@@ -13,6 +13,10 @@ class MockResponse extends Mock implements http.Response {}
 
 class FakeUri extends Fake implements Uri {}
 
+class MockStreamedResponse extends Mock implements http.StreamedResponse {}
+
+class FakeMultipartRequest extends Fake implements http.MultipartRequest {}
+
 void main() {
   group('ApiService', () {
     late http.Client httpClient;
@@ -66,12 +70,15 @@ void main() {
           '''
 [
   {
+    "id": 1,
     "image": "2d3eb689-c73f-4d8f-8259-88d0a7f57235.jpg"
   },
   {
+    "id": 2,
     "image": "de657f10-2cbc-4308-af98-902797c847a4.png"
   },
   {
+    "id": 3,
     "image": "cb75b3a7-a4b4-4977-b6cf-36de71b1b86e.png"
   }
 ]
@@ -83,15 +90,18 @@ void main() {
         expect(products.length, 3);
         expect(products[0], 
           isA<Product>()
-              .having((p) => p.image, 'image', '2d3eb689-c73f-4d8f-8259-88d0a7f57235.jpg'),
+              .having((p) => p.image, 'image', '2d3eb689-c73f-4d8f-8259-88d0a7f57235.jpg')
+              .having((p) => p.id, 'id', 1),
         );
         expect(products[1], 
           isA<Product>()
-              .having((p) => p.image, 'image', 'de657f10-2cbc-4308-af98-902797c847a4.png'),
+              .having((p) => p.image, 'image', 'de657f10-2cbc-4308-af98-902797c847a4.png')
+              .having((p) => p.id, 'id', 2),
         );
         expect(products[2], 
           isA<Product>()
-              .having((p) => p.image, 'image', 'cb75b3a7-a4b4-4977-b6cf-36de71b1b86e.png'),
+              .having((p) => p.image, 'image', 'cb75b3a7-a4b4-4977-b6cf-36de71b1b86e.png')
+              .having((p) => p.id, 'id', 3),
         );
       });
     });
@@ -103,7 +113,7 @@ void main() {
         when(() => response.bodyBytes).thenReturn(Uint8List(0));
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
         try {
-          await apiClient.fetchImage('test.jpg');
+          await apiClient.fetchImage(Product(image: 'test.jpg', id: 0));
         } catch (_) {}
         verify(
           () => httpClient.get(
@@ -117,7 +127,7 @@ void main() {
         when(() => response.statusCode).thenReturn(400);
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
         expect(
-          () async => await apiClient.fetchImage('test.jpg'),
+          () async => await apiClient.fetchImage(Product(image: 'test.jpg', id: 0)),
           throwsA(isA<Exception>()),
         );
       });
@@ -127,11 +137,54 @@ void main() {
         when(() => response.statusCode).thenReturn(200);
         when(() => response.bodyBytes).thenReturn(Uint8List.fromList([1, 2, 3]));
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
-        final image = await apiClient.fetchImage('test.jpg');
+        final image = await apiClient.fetchImage(Product(image: 'test.jpg', id: 0));
         expect(
           image, 
           isA<Image>()
               .having((i) => i.image, 'image', Uint8List.fromList([1, 2, 3])),
+        );
+      });
+    });
+
+    group('uploadImage', () {
+      registerFallbackValue(FakeMultipartRequest());
+      test('makes correct http request', () async {
+        final response = MockStreamedResponse();
+        when(() => response.statusCode).thenReturn(201);
+        when(() => httpClient.send(any())).thenAnswer((_) async => response);
+        final imageBytes = Uint8List.fromList([1, 2, 3]);
+        try {
+          await apiClient.uploadImage(imageBytes, 'jpg');
+        } catch (_) {}
+
+        verify(
+          () => httpClient.send(
+            any(that: predicate<http.MultipartRequest>((req) =>
+              req.method == 'POST' &&
+              req.url.toString() == 'https://localhost:7005/Product' &&
+              req.files.any((file) => file.field == 'ImageFile')
+            )),
+          ),
+        ).called(1);
+      });
+
+      test('throws Exception on non-201 response', () async {
+        final response = MockStreamedResponse();
+        when(() => response.statusCode).thenReturn(400);
+        when(() => httpClient.send(any())).thenAnswer((_) async => response);
+        expect(
+          () async => await apiClient.uploadImage(Uint8List.fromList([1, 2, 3]), 'jpg'),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('does not throw on valid response', () async {
+        final response = MockStreamedResponse();
+        when(() => response.statusCode).thenReturn(201);
+        when(() => httpClient.send(any())).thenAnswer((_) async => response);
+        expect(
+          () async => await apiClient.uploadImage(Uint8List.fromList([1, 2, 3]), 'jpg'),
+          returnsNormally,
         );
       });
     });

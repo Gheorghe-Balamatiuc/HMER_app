@@ -9,10 +9,12 @@ void main() {
           Product.fromJson(
             <String, dynamic> {
               'image': 'test_image.png',
+              'id': 1,
             },
           ),
           isA<Product>()
-              .having((p) => p.image, '', 'test_image.png'),
+              .having((p) => p.image, '', 'test_image.png')
+              .having((p) => p.id, '', 1),
         );
       });
     });

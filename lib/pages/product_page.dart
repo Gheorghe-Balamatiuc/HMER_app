@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,8 +10,6 @@ class ProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Uint8List? image;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Page'),
@@ -21,15 +17,17 @@ class ProductPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.upload_file),
             onPressed: () async {
+              final bloc = context.read<ProductBloc>();
               final FilePickerResult? result = await FilePicker.platform.pickFiles(
                 type: FileType.image,
                 allowMultiple: false,
               );
               if (result != null && result.files.isNotEmpty) {
                 final file = result.files.first;
+                final name = file.name;
+                final bytes = file.bytes!;
                 if (file.bytes != null) {
-                  image = file.bytes;
-                  print('file name: ${file.name}');
+                  bloc.add(ProductAdded(bytes, name));
                 }
               }
             },
@@ -44,18 +42,33 @@ class ProductPage extends StatelessWidget {
         ],
       ),
       body: BlocBuilder<ProductBloc, ProductState>(
-        buildWhen: (previous, current) => previous.runtimeType != current.runtimeType,
         builder: (context, state) {
           return switch (state) {
-            ProductInitial() => const CircularProgressIndicator(),
-            ProductLoading() => const CircularProgressIndicator(),
+            ProductInitial() => Center(child: const CircularProgressIndicator()),
+            ProductLoading() => Center(child: const CircularProgressIndicator()),
             ProductSuccess(images: final images) => ListView.builder(
               itemCount: images.length,
               itemBuilder: (context, index) {
-                return Image.memory(images[index].image);
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Image.memory(images[index].image),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            print(images[index].id);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
-            ProductFailure() => const Text('Failed to load images'),
+            ProductFailure() => Center(child: const Text('Failed to load images')),
           };
         },
       ),

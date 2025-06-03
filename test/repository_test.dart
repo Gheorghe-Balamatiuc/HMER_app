@@ -13,6 +13,8 @@ class MockImage extends Mock implements Image {}
 
 class MockProduct extends Mock implements Product {}
 
+class FakeProduct extends Fake implements Product {}
+
 void main() {
   group('Repository', () {
     late ApiService apiClient;
@@ -47,21 +49,26 @@ void main() {
       });
 
       test('calls fetchImage with correct name', () async {
+        registerFallbackValue(FakeProduct());
         final product = MockProduct();
         when(() => product.image).thenReturn('test_image.jpg');
+        when(() => product.id).thenReturn(0);
         when(() => apiClient.fetchProducts()).thenAnswer((_) async => [product]);
+        
         try {
           await repository.fetchImages();
         } catch (_) {}
-        verify(() => apiClient.fetchImage('test_image.jpg')).called(1);
+        
+        verify(() => apiClient.fetchImage(product)).called(1);
       });
 
       test('throws when fetchImage fails', () async {
         final exception = Exception('Failed to fetch image');
         final product = MockProduct();
         when(() => product.image).thenReturn('test_image.jpg');
+        when(() => product.id).thenReturn(0);
         when(() => apiClient.fetchProducts()).thenAnswer((_) async => [product]);
-        when(() => apiClient.fetchImage('test_image.jpg')).thenThrow(exception);
+        when(() => apiClient.fetchImage(product)).thenThrow(exception);
         expect(
           () async => await repository.fetchImages(),
           throwsA(exception),
@@ -72,9 +79,11 @@ void main() {
         final product = MockProduct();
         final image = MockImage();
         when(() => product.image).thenReturn('test_image.jpg');
+        when(() => product.id).thenReturn(0);
+        when(() => image.id).thenReturn(0);
         when(() => image.image).thenReturn(Uint8List.fromList([1, 2, 3]));
         when(() => apiClient.fetchProducts()).thenAnswer((_) async => [product, product]);
-        when(() => apiClient.fetchImage('test_image.jpg')).thenAnswer((_) async => image);
+        when(() => apiClient.fetchImage(product)).thenAnswer((_) async => image);
 
         final images = await repository.fetchImages();
 

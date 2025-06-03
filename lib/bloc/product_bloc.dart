@@ -7,6 +7,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
   ProductBloc(this._repository) : super(ProductInitial()) {
     on<ProductFetched>(_onFetched);
     on<ProductRefreshed>(_onRefreshed);
+    on<ProductAdded>(_onAdded);
   }
 
   final Repository _repository;
@@ -29,6 +30,15 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
       emit(ProductSuccess(images: images));
     } catch (e) {
       emit(state);
+    }
+  }
+
+  void _onAdded(ProductAdded event, Emitter<ProductState> emit) async {
+    try {
+      await _repository.uploadImage(event.image, event.name);
+      add(ProductRefreshed());
+    } catch (e) {
+      emit(ProductFailure());
     }
   }
 }
