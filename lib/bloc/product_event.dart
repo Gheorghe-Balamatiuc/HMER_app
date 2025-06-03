@@ -18,3 +18,9 @@ final class ProductAdded extends ProductEvent {
   final Uint8List image;
   final String name;
 }
+
+final class ProductDeleted extends ProductEvent {
+  const ProductDeleted(this.id);
+
+  final int id;
+}

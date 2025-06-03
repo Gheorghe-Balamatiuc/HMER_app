@@ -59,7 +59,7 @@ class ProductPage extends StatelessWidget {
                         child: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            print(images[index].id);
+                            context.read<ProductBloc>().add(ProductDeleted(images[index].id));
                           },
                         ),
                       ),

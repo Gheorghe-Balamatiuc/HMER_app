@@ -8,6 +8,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
     on<ProductFetched>(_onFetched);
     on<ProductRefreshed>(_onRefreshed);
     on<ProductAdded>(_onAdded);
+    on<ProductDeleted>(_onDeleted);
   }
 
   final Repository _repository;
@@ -36,6 +37,16 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
   void _onAdded(ProductAdded event, Emitter<ProductState> emit) async {
     try {
       await _repository.uploadImage(event.image, event.name);
+      add(ProductRefreshed());
+    } catch (e) {
+      emit(ProductFailure());
+    }
+  }
+
+  void _onDeleted(ProductDeleted event, Emitter<ProductState> emit) async {
+    if (state is! ProductSuccess) return;
+    try {
+      await _repository.deleteProduct(event.id);
       add(ProductRefreshed());
     } catch (e) {
       emit(ProductFailure());

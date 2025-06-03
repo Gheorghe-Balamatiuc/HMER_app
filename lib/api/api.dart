@@ -57,6 +57,16 @@ class ApiService {
     }
   }
 
+  Future<void> deleteProduct(int id) async {
+    final response = await _httpClient.delete(
+      Uri.parse("$_baseUrl/Product/$id"),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete product: ${response.statusCode}');
+    }
+  }
+
   void close() {
     _httpClient.close();
   }

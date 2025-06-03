@@ -189,6 +189,42 @@ void main() {
       });
     });
 
+    group('deleteProduct', () {
+      test('makes correct http request', () async {
+        final response = MockResponse();
+        when(() => response.statusCode).thenReturn(204);
+        when(() => httpClient.delete(any())).thenAnswer((_) async => response);
+        try {
+          await apiClient.deleteProduct(1);
+        } catch (_) {}
+        verify(
+          () => httpClient.delete(
+            Uri.parse('https://localhost:7005/Product/1'),
+          ),
+        ).called(1);
+      });
+
+      test('throws Exception on non-204 response', () async {
+        final response = MockResponse();
+        when(() => response.statusCode).thenReturn(400);
+        when(() => httpClient.delete(any())).thenAnswer((_) async => response);
+        expect(
+          () async => await apiClient.deleteProduct(1),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('does not throw on valid response', () async {
+        final response = MockResponse();
+        when(() => response.statusCode).thenReturn(204);
+        when(() => httpClient.delete(any())).thenAnswer((_) async => response);
+        expect(
+          () async => await apiClient.deleteProduct(1),
+          returnsNormally,
+        );
+      });
+    });
+
     group('close', () {
       test('closes the http client', () {
         apiClient.close();

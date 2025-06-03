@@ -24,5 +24,9 @@ class Repository {
     await _apiClient.uploadImage(image, name);
   }
 
+  Future<void> deleteProduct(int id) async {
+    await _apiClient.deleteProduct(id);
+  }
+
   void dispose() => _apiClient.close();
 }
