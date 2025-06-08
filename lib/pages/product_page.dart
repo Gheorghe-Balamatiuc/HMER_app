@@ -56,14 +56,16 @@ class ProductPage extends StatelessWidget {
                     children: [
                       Image.memory(images[index].image),
                       Row(
-                        mainAxisSize: MainAxisSize.min,  // This is the key part
+                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 8.0,
                         children: [
-                          Text(
-                            images[index].imagePrediction,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              images[index].imagePrediction,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.copy),
