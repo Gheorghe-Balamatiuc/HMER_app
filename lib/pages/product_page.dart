@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hmer_app/bloc/product_bloc.dart';
 import 'package:hmer_app/bloc/product_event.dart';
@@ -54,6 +55,27 @@ class ProductPage extends StatelessWidget {
                   child: Column(
                     children: [
                       Image.memory(images[index].image),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,  // This is the key part
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8.0,
+                        children: [
+                          Text(
+                            images[index].imagePrediction,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: images[index].imagePrediction));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Prediction copied to clipboard')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                       Padding(
                         padding: EdgeInsets.all(8.0),
                         child: IconButton(
