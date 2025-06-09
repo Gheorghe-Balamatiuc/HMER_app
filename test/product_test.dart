@@ -11,12 +11,14 @@ void main() {
               'image': 'test_image.png',
               'id': 1,
               'imagePrediction': 'test_prediction',
+              'predictionDescription': 'test_description',
             },
           ),
           isA<Product>()
               .having((p) => p.image, '', 'test_image.png')
               .having((p) => p.id, '', 1)
-            .having((p) => p.imagePrediction, '', 'test_prediction'),
+              .having((p) => p.imagePrediction, '', 'test_prediction')
+              .having((p) => p.predictionDescription, '', 'test_description'),
         );
       });
     });

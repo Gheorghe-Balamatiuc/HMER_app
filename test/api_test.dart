@@ -72,17 +72,20 @@ void main() {
   {
     "id": 1,
     "image": "2d3eb689-c73f-4d8f-8259-88d0a7f57235.jpg",
-    "imagePrediction": "test_prediction"
+    "imagePrediction": "test_prediction",
+    "predictionDescription": "Test description"
   },
   {
     "id": 2,
     "image": "de657f10-2cbc-4308-af98-902797c847a4.png",
-    "imagePrediction": "another_prediction"
+    "imagePrediction": "another_prediction",
+    "predictionDescription": "Another test description"
   },
   {
     "id": 3,
     "image": "cb75b3a7-a4b4-4977-b6cf-36de71b1b86e.png",
-    "imagePrediction": "yet_another_prediction"
+    "imagePrediction": "yet_another_prediction",
+    "predictionDescription": "Yet another test description"
   }
 ]
 ''',
@@ -95,19 +98,22 @@ void main() {
           isA<Product>()
               .having((p) => p.image, 'image', '2d3eb689-c73f-4d8f-8259-88d0a7f57235.jpg')
               .having((p) => p.id, 'id', 1)
-              .having((p) => p.imagePrediction, 'imagePrediction', 'test_prediction'),
+              .having((p) => p.imagePrediction, 'imagePrediction', 'test_prediction')
+              .having((p) => p.predictionDescription, 'predictionDescription', 'Test description'),
         );
         expect(products[1], 
           isA<Product>()
               .having((p) => p.image, 'image', 'de657f10-2cbc-4308-af98-902797c847a4.png')
               .having((p) => p.id, 'id', 2)
-              .having((p) => p.imagePrediction, 'imagePrediction', 'another_prediction'),
+              .having((p) => p.imagePrediction, 'imagePrediction', 'another_prediction')
+              .having((p) => p.predictionDescription, 'predictionDescription', 'Another test description'),
         );
         expect(products[2], 
           isA<Product>()
               .having((p) => p.image, 'image', 'cb75b3a7-a4b4-4977-b6cf-36de71b1b86e.png')
               .having((p) => p.id, 'id', 3)
-              .having((p) => p.imagePrediction, 'imagePrediction', 'yet_another_prediction'),
+              .having((p) => p.imagePrediction, 'imagePrediction', 'yet_another_prediction')
+              .having((p) => p.predictionDescription, 'predictionDescription', 'Yet another test description'),
         );
       });
     });
@@ -119,7 +125,7 @@ void main() {
         when(() => response.bodyBytes).thenReturn(Uint8List(0));
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
         try {
-          await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: ''));
+          await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: '', predictionDescription: ''));
         } catch (_) {}
         verify(
           () => httpClient.get(
@@ -133,7 +139,7 @@ void main() {
         when(() => response.statusCode).thenReturn(400);
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
         expect(
-          () async => await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: '')),
+          () async => await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: '', predictionDescription: '')),
           throwsA(isA<Exception>()),
         );
       });
@@ -143,13 +149,14 @@ void main() {
         when(() => response.statusCode).thenReturn(200);
         when(() => response.bodyBytes).thenReturn(Uint8List.fromList([1, 2, 3]));
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
-        final image = await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: 'test_prediction'));
+        final image = await apiClient.fetchImage(Product(image: 'test.jpg', id: 0, imagePrediction: 'test_prediction', predictionDescription: 'test_description'));
         expect(
           image, 
           isA<Image>()
               .having((i) => i.image, 'image', Uint8List.fromList([1, 2, 3]))
               .having((i) => i.id, 'id', 0)
-              .having((i) => i.imagePrediction, 'imagePrediction', 'test_prediction'),
+              .having((i) => i.imagePrediction, 'imagePrediction', 'test_prediction')
+              .having((i) => i.predictionDescription, 'predictionDescription', 'test_description'),
         );
       });
     });

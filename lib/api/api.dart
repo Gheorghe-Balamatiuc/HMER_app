@@ -31,7 +31,12 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return Image(image: response.bodyBytes, id: product.id, imagePrediction: product.imagePrediction);
+      return Image(
+        image: response.bodyBytes, 
+        id: product.id, 
+        imagePrediction: product.imagePrediction,
+        predictionDescription: product.predictionDescription,
+      );
     } else {
       throw Exception('Failed to load image: ${response.statusCode}');
     }

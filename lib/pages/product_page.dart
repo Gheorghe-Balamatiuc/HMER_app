@@ -60,7 +60,7 @@ class ProductPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 8.0,
                         children: [
-                          Expanded(
+                          Flexible(
                             child: Text(
                               images[index].imagePrediction,
                               textAlign: TextAlign.center,
@@ -73,6 +73,35 @@ class ProductPage extends StatelessWidget {
                               Clipboard.setData(ClipboardData(text: images[index].imagePrediction));
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Prediction copied to clipboard')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8.0,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              images[index].predictionDescription,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.volume_up),
+                            onPressed: () {
+
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: images[index].predictionDescription));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Description copied to clipboard')),
                               );
                             },
                           ),
