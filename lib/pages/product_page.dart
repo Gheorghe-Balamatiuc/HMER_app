@@ -2,13 +2,52 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hmer_app/bloc/product_bloc.dart';
 import 'package:hmer_app/bloc/product_event.dart';
 import 'package:hmer_app/bloc/product_state.dart';
 
-class ProductPage extends StatelessWidget {
+class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
 
+  @override
+  State<ProductPage> createState() => _ProductPageState();
+}
+
+class _ProductPageState extends State<ProductPage> {
+  late FlutterTts _flutterTts;
+  bool _ttsInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    _flutterTts = FlutterTts();
+    await _flutterTts.setLanguage("en-GB");
+    await _flutterTts.setVoice({"name": "Google UK English Female", "locale": "en-GB"});
+    await _flutterTts.setSpeechRate(0.6);
+    _ttsInitialized = true;
+  }
+
+  Future<void> _speak(String text) async {
+    if (!_ttsInitialized) {
+      await _initTts();
+    }
+    // Re-apply settings to ensure they're active
+    await _flutterTts.setVoice({"name": "Google UK English Female", "locale": "en-GB"});
+    await _flutterTts.setSpeechRate(0.6);
+    await _flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    _flutterTts.stop();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,9 +130,15 @@ class ProductPage extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.volume_up),
-                            onPressed: () {
-
+                            icon: const Icon(Icons.play_arrow),
+                            onPressed: () async {
+                              await _speak(images[index].predictionDescription);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.stop),
+                            onPressed: () async {
+                              await _flutterTts.stop();
                             },
                           ),
                           IconButton(

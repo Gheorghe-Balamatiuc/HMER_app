@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       child: BlocProvider(
         create: (context) => ProductBloc(context.read<Repository>())
             ..add(ProductFetched()),
-        child: const MaterialApp(
+        child: MaterialApp(
           title: 'HMER App',
           home: ProductPage(),
         ),
