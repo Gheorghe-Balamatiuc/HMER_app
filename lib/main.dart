@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: 'HMER App',
           home: ProductPage(),
+          debugShowCheckedModeBanner: false,
         ),
       ),
     );
