@@ -10,7 +10,7 @@ class ApiService {
   ApiService({http.Client? httpClient}) : _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
-  final String _baseUrl = "https://localhost:7005";
+  final String _baseUrl = "http://10.0.2.2:5071";
 
   Future<List<Product>> fetchProducts() async {
     final response = await _httpClient.get(

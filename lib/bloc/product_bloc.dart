@@ -2,6 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hmer_app/api/repository.dart';
 import 'package:hmer_app/bloc/product_event.dart';
 import 'package:hmer_app/bloc/product_state.dart';
+import 'package:logger/logger.dart';
+
+final logger = Logger();
 
 class ProductBloc extends Bloc<ProductEvent, ProductState>  {
   ProductBloc(this._repository) : super(ProductInitial()) {
@@ -20,6 +23,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
       final images = await _repository.fetchImages();
       emit(ProductSuccess(images: images));
     } catch (e) {
+      logger.e("Error fetching products: $e");
       emit(ProductFailure());
     }
   }
@@ -30,6 +34,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
       final images = await _repository.fetchImages();
       emit(ProductSuccess(images: images));
     } catch (e) {
+      logger.e("Error refreshing products: $e");
       emit(state);
     }
   }
@@ -39,6 +44,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
       await _repository.uploadImage(event.image, event.name);
       add(ProductRefreshed());
     } catch (e) {
+      logger.e("Error adding product: $e");
       emit(ProductFailure());
     }
   }
@@ -49,6 +55,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
       await _repository.deleteProduct(event.id);
       add(ProductRefreshed());
     } catch (e) {
+      logger.e("Error deleting product: $e");
       emit(ProductFailure());
     }
   }

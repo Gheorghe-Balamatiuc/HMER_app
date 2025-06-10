@@ -27,7 +27,6 @@ class _ProductPageState extends State<ProductPage> {
   Future<void> _initTts() async {
     _flutterTts = FlutterTts();
     await _flutterTts.setLanguage("en-GB");
-    await _flutterTts.setVoice({"name": "Google UK English Female", "locale": "en-GB"});
     await _flutterTts.setSpeechRate(0.6);
     _ttsInitialized = true;
   }
@@ -37,8 +36,8 @@ class _ProductPageState extends State<ProductPage> {
       await _initTts();
     }
     // Re-apply settings to ensure they're active
-    await _flutterTts.setVoice({"name": "Google UK English Female", "locale": "en-GB"});
-    await _flutterTts.setSpeechRate(0.6);
+    await _flutterTts.setLanguage("en-GB");
+    await _flutterTts.setSpeechRate(0.45);
     await _flutterTts.speak(text);
   }
 
@@ -59,7 +58,9 @@ class _ProductPageState extends State<ProductPage> {
             onPressed: () async {
               final bloc = context.read<ProductBloc>();
               final FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.image,
+                type: FileType.any,
+                dialogTitle: 'Select an image file',
+                withData: true,
                 allowMultiple: false,
               );
               if (result != null && result.files.isNotEmpty) {
@@ -93,7 +94,11 @@ class _ProductPageState extends State<ProductPage> {
                   margin: EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      Image.memory(images[index].image),
+                      Image.memory(
+                        images[index].image,
+                        height: 200,
+                        width: double.infinity,
+                      ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
