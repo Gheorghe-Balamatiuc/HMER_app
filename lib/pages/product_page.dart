@@ -38,7 +38,7 @@ class _ProductPageState extends State<ProductPage> {
     if (!_ttsInitialized) {
       await _initTts();
     }
-    // Re-apply settings to ensure they're active
+    
     await _flutterTts.setLanguage("en-GB");
     await _flutterTts.setSpeechRate(0.45);
     await _flutterTts.speak(text);
@@ -79,27 +79,53 @@ class _ProductPageState extends State<ProductPage> {
             expandedHeight: 230,
             backgroundColor: const Color.fromARGB(255, 37, 40, 105),
             actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.upload_file,
-                  color: Colors.white,
-                ),
-                onPressed: () async {
-                  final bloc = context.read<ProductBloc>();
-                  final FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    type: FileType.any,
-                    dialogTitle: 'Select an image file',
-                    withData: true,
-                    allowMultiple: false,
-                  );
-                  if (result != null && result.files.isNotEmpty) {
-                    final file = result.files.first;
-                    final name = file.name;
-                    final bytes = file.bytes!;
-                    if (file.bytes != null) {
-                      bloc.add(ProductAdded(bytes, name));
-                    }
-                  }
+              BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  return switch (state) {
+                    ProductInitial() => IconButton(
+                      icon: const Icon(
+                        Icons.upload_file,
+                        color: Colors.white,
+                      ),
+                      onPressed: null,
+                    ),
+                    ProductLoading() => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
+                    ProductSuccess() => IconButton(
+                      icon: const Icon(
+                        Icons.upload_file,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {
+                        final bloc = context.read<ProductBloc>();
+                        final FilePickerResult? result = await FilePicker.platform.pickFiles(
+                          type: FileType.any,
+                          dialogTitle: 'Select an image file',
+                          withData: true,
+                          allowMultiple: false,
+                        );
+                        if (result != null && result.files.isNotEmpty) {
+                          final file = result.files.first;
+                          final name = file.name;
+                          final bytes = file.bytes!;
+                          if (file.bytes != null) {
+                            bloc.add(ProductAdded(bytes, name));
+                          }
+                        }
+                      },
+                    ),
+                    ProductFailure() => IconButton(
+                      icon: const Icon(
+                        Icons.upload_file,
+                        color: Colors.white,
+                      ),
+                      onPressed: null,
+                    ),
+                  };
                 },
               ),
             ],
@@ -121,7 +147,6 @@ class _ProductPageState extends State<ProductPage> {
               
               context.read<ProductBloc>().add(ProductRefreshed());
               
-              // Wait for the operation to complete
               return completer.future;
             },
             refreshTriggerPullDistance: 120.0,
@@ -130,10 +155,16 @@ class _ProductPageState extends State<ProductPage> {
             builder: (context, state) {
               return switch (state) {
                 ProductInitial() => SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator())
+                  child: Center(child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ))
                 ),
                 ProductLoading() => SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator())
+                  child: Center(child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ))
                 ),
                 ProductSuccess(images: final images) => SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -227,8 +258,8 @@ class _ProductPageState extends State<ProductPage> {
                                 },
                                 style: OutlinedButton.styleFrom(
                                   minimumSize: Size(
-                                    double.infinity, // Width
-                                    48, // Height
+                                    double.infinity,
+                                    48,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16.0),

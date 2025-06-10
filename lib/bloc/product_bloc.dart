@@ -40,8 +40,12 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>  {
   }
 
   void _onAdded(ProductAdded event, Emitter<ProductState> emit) async {
+    if (state is! ProductSuccess) return;
     try {
+      emit(ProductLoading());
       await _repository.uploadImage(event.image, event.name);
+      final images = await _repository.fetchImages();
+      emit(ProductSuccess(images: images));
       add(ProductRefreshed());
     } catch (e) {
       logger.e("Error adding product: $e");
