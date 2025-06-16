@@ -7,6 +7,7 @@ import 'package:hmer_app/models/image.dart';
 import 'package:hmer_app/models/product.dart';
 import 'package:mocktail/mocktail.dart';
 
+// Mock classes for testing
 class MockApiClient extends Mock implements ApiService {}
 
 class MockImage extends Mock implements Image {}
@@ -16,22 +17,27 @@ class MockProduct extends Mock implements Product {}
 class FakeProduct extends Fake implements Product {}
 
 void main() {
+  // Main test group for Repository tests
   group('Repository', () {
     late ApiService apiClient;
     late Repository repository;
 
+    // Setup common test dependencies before each test
     setUp(() {
       apiClient = MockApiClient();
       repository = Repository(apiClient: apiClient);
     });
 
+    // Test the constructor behavior
     group('Constructor', () {
       test('does not require an ApiService', () {
         expect(Repository(), isNotNull);
       });
     });
 
+    // Test the fetchImages method
     group('fetchImages', () {
+      // Test that fetchProducts is called
       test('calls fetchProducts', () async {
         try {
           await repository.fetchImages();
@@ -39,6 +45,7 @@ void main() {
         verify(() => apiClient.fetchProducts()).called(1);
       });
 
+      // Test exception handling when fetchProducts fails
       test('throws when fetchProducts fails', () {
         final exception = Exception('Failed to fetch products');
         when(() => apiClient.fetchProducts()).thenThrow(exception);
@@ -48,6 +55,7 @@ void main() {
         );
       });
 
+      // Test that fetchImage is called with the correct product
       test('calls fetchImage with correct name', () async {
         registerFallbackValue(FakeProduct());
         final product = MockProduct();
@@ -62,6 +70,7 @@ void main() {
         verify(() => apiClient.fetchImage(product)).called(1);
       });
 
+      // Test exception handling when fetchImage fails
       test('throws when fetchImage fails', () async {
         final exception = Exception('Failed to fetch image');
         final product = MockProduct();
@@ -75,6 +84,7 @@ void main() {
         );
       });
 
+      // Test that fetchImages returns the correct list of images
       test('returns correct list of images', () async {
         final product = MockProduct();
         final image = MockImage();
@@ -94,6 +104,7 @@ void main() {
       });
     });
 
+    // Test the dispose method
     group('dispose', () {
       test('calls close on ApiService', () {
         repository.dispose();

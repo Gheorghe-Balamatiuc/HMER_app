@@ -10,6 +10,7 @@ import 'package:hmer_app/bloc/product_bloc.dart';
 import 'package:hmer_app/bloc/product_event.dart';
 import 'package:hmer_app/bloc/product_state.dart';
 
+/// Main page for displaying and interacting with mathematical expressions
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
 
@@ -27,6 +28,7 @@ class _ProductPageState extends State<ProductPage> {
     _initTts();
   }
 
+  /// Initialize the text-to-speech engine with English language and reduced speech rate
   Future<void> _initTts() async {
     _flutterTts = FlutterTts();
     await _flutterTts.setLanguage("en-GB");
@@ -34,6 +36,8 @@ class _ProductPageState extends State<ProductPage> {
     _ttsInitialized = true;
   }
 
+  /// Read the given text using the text-to-speech engine
+  /// Initialize TTS if it hasn't been initialized yet
   Future<void> _speak(String text) async {
     if (!_ttsInitialized) {
       await _initTts();
@@ -46,6 +50,7 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   void dispose() {
+    // Stop any ongoing speech before disposing the widget
     _flutterTts.stop();
     super.dispose();
   }
@@ -56,6 +61,7 @@ class _ProductPageState extends State<ProductPage> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         slivers: [
+          // App bar with title and upload button
           SliverAppBar(
             snap: false,
             pinned: true,
@@ -79,6 +85,7 @@ class _ProductPageState extends State<ProductPage> {
             expandedHeight: 230,
             backgroundColor: const Color.fromARGB(255, 37, 40, 105),
             actions: [
+              // Upload button in app bar - state dependent
               BlocBuilder<ProductBloc, ProductState>(
                 builder: (context, state) {
                   return switch (state) {
@@ -100,6 +107,7 @@ class _ProductPageState extends State<ProductPage> {
                         Icons.upload_file,
                         color: Colors.white,
                       ),
+                      // Handle file selection and upload
                       onPressed: () async {
                         final bloc = context.read<ProductBloc>();
                         final FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -130,10 +138,12 @@ class _ProductPageState extends State<ProductPage> {
               ),
             ],
           ),
+          // Pull-to-refresh control
           CupertinoSliverRefreshControl(
             onRefresh: () async {
               final completer = Completer<void>();
               
+              // Listen for state changes to complete the refresh operation
               late final StreamSubscription subscription;
               subscription = context.read<ProductBloc>().stream.listen((state) {
                 if (state is ProductSuccess) {
@@ -145,12 +155,14 @@ class _ProductPageState extends State<ProductPage> {
                 }
               });
               
+              // Trigger the refresh event
               context.read<ProductBloc>().add(ProductRefreshed());
               
               return completer.future;
             },
             refreshTriggerPullDistance: 120.0,
           ),
+          // Main content - list of images with their predictions
           BlocBuilder<ProductBloc, ProductState>(
             builder: (context, state) {
               return switch (state) {
@@ -176,10 +188,12 @@ class _ProductPageState extends State<ProductPage> {
                           child: Column(
                             spacing: 16.0,
                             children: [
+                              // Display the image
                               Image.memory(
                                 images[index].image,
                                 fit: BoxFit.contain,
                               ),
+                              // Button to copy LaTeX code
                               TextButton(
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(text: images[index].imagePrediction));
@@ -192,6 +206,7 @@ class _ProductPageState extends State<ProductPage> {
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),
+                              // Display prediction description with copy button
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -217,6 +232,7 @@ class _ProductPageState extends State<ProductPage> {
                                   ),
                                 ],
                               ),
+                              // TTS play and stop buttons
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -252,6 +268,7 @@ class _ProductPageState extends State<ProductPage> {
                                   ),
                                 ],
                               ),
+                              // Delete button
                               OutlinedButton(
                                 onPressed: () {
                                   context.read<ProductBloc>().add(ProductDeleted(images[index].id));

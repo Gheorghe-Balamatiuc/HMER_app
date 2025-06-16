@@ -7,6 +7,7 @@ import 'package:hmer_app/models/product.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 
+// Mock classes for testing
 class MockHttpClient extends Mock implements http.Client {}
 
 class MockResponse extends Mock implements http.Response {}
@@ -18,26 +19,32 @@ class MockStreamedResponse extends Mock implements http.StreamedResponse {}
 class FakeMultipartRequest extends Fake implements http.MultipartRequest {}
 
 void main() {
+  // Main test group for ApiService functionality
   group('ApiService', () {
     late http.Client httpClient;
     late ApiService apiClient;
 
+    // Register fallback values for mocktail
     setUpAll(() {
       registerFallbackValue(FakeUri());
     });
 
+    // Setup common test dependencies before each test
     setUp(() {
       httpClient = MockHttpClient();
       apiClient = ApiService(httpClient: httpClient);
     });
 
+    // Test the constructor behavior
     group('Constructor', () {
       test('does not require an httpClient', () {
         expect(ApiService(), isNotNull);
       });
     });    
 
+    // Test the fetchProducts method
     group('fetchProducts', () {
+      // Test that the HTTP request is correctly formed
       test('makes correct http request', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(200);
@@ -53,6 +60,7 @@ void main() {
         ).called(1);
       });
 
+      // Test error handling for non-successful responses
       test('throws Exception on non-200 response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(400);
@@ -63,6 +71,7 @@ void main() {
         );
       });
 
+      // Test successful response parsing
       test('returns image list on valid response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(200);
@@ -118,7 +127,9 @@ void main() {
       });
     });
 
+    // Test the fetchImage method
     group('fetchImage', () {
+      // Test that the HTTP request is correctly formed
       test('makes correct http request', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(200);
@@ -134,6 +145,7 @@ void main() {
         ).called(1);
       });
 
+      // Test error handling for non-successful responses
       test('throws Exception on non-200 response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(400);
@@ -144,6 +156,7 @@ void main() {
         );
       });
 
+      // Test successful response parsing
       test('returns Image on valid response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(200);
@@ -161,8 +174,10 @@ void main() {
       });
     });
 
+    // Test the uploadImage method
     group('uploadImage', () {
       registerFallbackValue(FakeMultipartRequest());
+      // Test that the HTTP request is correctly formed
       test('makes correct http request', () async {
         final response = MockStreamedResponse();
         when(() => response.statusCode).thenReturn(201);
@@ -183,6 +198,7 @@ void main() {
         ).called(1);
       });
 
+      // Test error handling for non-successful responses
       test('throws Exception on non-201 response', () async {
         final response = MockStreamedResponse();
         when(() => response.statusCode).thenReturn(400);
@@ -193,6 +209,7 @@ void main() {
         );
       });
 
+      // Test successful response handling
       test('does not throw on valid response', () async {
         final response = MockStreamedResponse();
         when(() => response.statusCode).thenReturn(201);
@@ -204,7 +221,9 @@ void main() {
       });
     });
 
+    // Test the deleteProduct method
     group('deleteProduct', () {
+      // Test that the HTTP request is correctly formed
       test('makes correct http request', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(204);
@@ -219,6 +238,7 @@ void main() {
         ).called(1);
       });
 
+      // Test error handling for non-successful responses
       test('throws Exception on non-204 response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(400);
@@ -229,6 +249,7 @@ void main() {
         );
       });
 
+      // Test successful response handling
       test('does not throw on valid response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(204);
@@ -240,6 +261,7 @@ void main() {
       });
     });
 
+    // Test the close method
     group('close', () {
       test('closes the http client', () {
         apiClient.close();

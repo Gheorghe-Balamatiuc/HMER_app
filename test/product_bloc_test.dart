@@ -9,17 +9,21 @@ import 'package:hmer_app/bloc/product_state.dart';
 import 'package:hmer_app/models/image.dart';
 import 'package:mocktail/mocktail.dart';
 
+// Mock class for Repository to isolate the BLoC tests
 class MockRepository extends Mock implements Repository {}
 
+// Mock class for Image to use in tests
 class MockImage extends Mock implements Image {}
 
 void main() {
+  // Main test group for ProductBloc functionality
   group('ProductBloc', () {
     late Repository repository;
     late Image image;
     late List<Image> images;
     late ProductBloc productBloc;
 
+    // Setup common test dependencies before each test
     setUp(() {
       image = MockImage();
       images = [
@@ -32,12 +36,15 @@ void main() {
       productBloc = ProductBloc(repository);
     });
 
+    // Test for the initial state of the BLoC
     test('initial state is correct', () {
       final productBloc = ProductBloc(repository);
       expect(productBloc.state, ProductInitial());
     });
 
+    // Test group for ProductFetched event
     group('ProductFetched', () {
+      // Test that fetchImages is called when ProductFetched event is added
       blocTest(
         'calls fetchImages when ProductFetched', 
         build: () => productBloc,
@@ -47,6 +54,7 @@ void main() {
         }
       );
 
+      // Test error handling when fetchImages throws an exception
       blocTest(
         'emits [ProductLoading, ProductFailure] when fetchImages throws',
         setUp: () {
@@ -60,6 +68,7 @@ void main() {
         ],
       );
 
+      // Test successful fetch of images
       blocTest(
         'emits [ProductLoading, ProductSuccess] with images when fetchImages succeeds',
         build: () => productBloc,
@@ -71,7 +80,9 @@ void main() {
       );
     });
 
+    // Test group for ProductRefreshed event
     group('ProductRefreshed', () {
+      // Test that fetchImages is not called when state is not ProductSuccess
       blocTest(
         'does not call fetchImages when state is not ProductSuccess',
         build: () => productBloc,
@@ -82,6 +93,7 @@ void main() {
         },
       );
 
+      // Test that fetchImages is called when state is ProductSuccess
       blocTest<ProductBloc, ProductState>(
         'calls fetchImages when ProductRefreshed and state is ProductSuccess',
         build: () => productBloc,
@@ -92,6 +104,7 @@ void main() {
         },
       );
 
+      // Test error handling when fetchImages throws an exception during refresh
       blocTest<ProductBloc, ProductState>(
         'emits nothing when fetchImages throws',
         setUp: () {
@@ -103,6 +116,7 @@ void main() {
         expect: () => [],
       );
 
+      // Test successful refresh of images
       blocTest<ProductBloc, ProductState>(
         'emits [ProductSuccess] with new images when fetchImages succeeds',
         build: () => productBloc,

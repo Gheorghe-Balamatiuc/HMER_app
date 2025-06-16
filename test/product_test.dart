@@ -2,8 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hmer_app/models/product.dart';
 
 void main() {
+  // Test group for Product class functionality
   group('Product', () {
+    // Tests for the fromJson factory method
     group('fromJson', () {
+      // Test that valid JSON can be correctly parsed into a Product object
       test('should return a valid Product object when given valid JSON', () {
         expect(
           Product.fromJson(
